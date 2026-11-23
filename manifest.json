@@ -1,0 +1,25 @@
+{
+  "name": "寶可夢 18 屬性防禦弱點關聯圖",
+  "short_name": "寶可夢屬性圖",
+  "description": "Pokémon GO 18 屬性防禦弱點互動關聯圖與雙欄對照表，支援離線使用與高畫質 PNG 匯出。",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

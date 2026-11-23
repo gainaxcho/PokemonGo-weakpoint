@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>寶可夢 18 屬性防禦弱點關聯圖 (Pokémon GO)</title>
+  <meta name="theme-color" content="#0f172a" />
+  <meta name="description" content="Pokémon GO 18 屬性防禦弱點互動關聯圖與雙欄對照表" />
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="icon" type="image/png" href="./icon-192.png" />
+  <link rel="apple-touch-icon" href="./icon-192.png" />
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #1e293b;
+      --panel-2: #0b1220;
+      --border: #334155;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --accent: #ef4444;
+      --accent-soft: rgba(239, 68, 68, 0.16);
+      --ok: #22c55e;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+      background: radial-gradient(circle at top, #172554 0%, var(--bg) 55%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(8px);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+    .title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .title-wrap img {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+    }
+    h1 {
+      margin: 0;
+      font-size: 1.15rem;
+      letter-spacing: 0.3px;
+    }
+    .subtitle {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+    button {
+      background: var(--panel);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 8px 13px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: inherit;
+    }
+    button:hover {
+      border-color: #64748b;
+      background: #283548;
+    }
+    button.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      font-weight: 600;
+    }
+    button.install-btn {
+      background: #2563eb;
+      border-color: #3b82f6;
+      color: #fff;
+      font-weight: 600;
+      display: none;
+    }
+    button.install-btn:hover {
+      background: #1d4ed8;
+    }
+    main {
+      flex: 1;
+      max-width: 1380px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 18px;
+    }
+    .graph-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 340px;
+      gap: 18px;
+      align-items: start;
+    }
+    @media (max-width: 980px) {
+      .graph-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+    .card {
+      background: rgba(30, 41, 59, 0.78);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
+    }
+    .svg-wrap {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      max-height: 760px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    svg#typeGraph {
+      width: 100%;
+      height: 100%;
+      max-width: 760px;
+      max-height: 760px;
+      user-select: none;
+    }
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-top: 10px;
+      justify-content: center;
+    }
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .dot-red {
+      width: 18px;
+      height: 3px;
+      background: var(--accent);
+      display: inline-block;
+      border-radius: 2px;
+    }
+    .side-panel h2 {
+      margin: 0 0 10px;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .hint {
+      font-size: 0.84rem;
+      color: var(--muted);
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+    .selected-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border-radius: 12px;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      margin-bottom: 14px;
+    }
+    .section-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin: 12px 0 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .badge-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .type-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 10px 5px 6px;
+      border-radius: 999px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      color: #fff;
+      cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.2);
+      transition: transform 0.14s ease, filter 0.14s ease;
+    }
+    .type-pill:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.1);
+    }
+    .type-pill svg {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+    }
+    .quick-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin-top: 12px;
+    }
+    .quick-grid .type-pill {
+      justify-content: center;
+      padding: 6px 6px;
+      font-size: 0.78rem;
+    }
+    /* Table View */
+    .table-view {
+      display: none;
+    }
+    .search-bar {
+      width: 100%;
+      max-width: 360px;
+      padding: 9px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--panel-2);
+      color: var(--text);
+      font-size: 0.9rem;
+      margin-bottom: 14px;
+      outline: none;
+    }
+    .search-bar:focus {
+      border-color: #60a5fa;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      text-align: left;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    th {
+      color: var(--muted);
+      font-size: 0.85rem;
+      background: rgba(11, 18, 32, 0.6);
+    }
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.03);
+    }
+    .edge-path {
+      fill: none;
+      stroke: #ef4444;
+      transition: opacity 0.2s ease, stroke-width 0.2s ease;
+    }
+    .edge-animated {
+      stroke-dasharray: 8 5;
+      animation: flow 0.9s linear infinite;
+    }
+    @keyframes flow {
+      to { stroke-dashoffset: -26; }
+    }
+    .node-group {
+      cursor: pointer;
+      transition: opacity 0.2s ease;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="title-wrap">
+      <img src="./icon-192.png" alt="App Icon" onerror="this.style.display='none'" />
+      <div>
+        <h1>寶可夢 18 屬性防禦弱點關聯圖</h1>
+        <div class="subtitle">Pokémon GO 視覺徽章版 · 紅色箭頭表示「防禦屬性 ➔ 防禦弱點」（共 51 條）</div>
+      </div>
+    </div>
+    <div class="controls">
+      <button id="btnGraphView" class="active">關聯圖視圖</button>
+      <button id="btnTableView">雙欄對照表</button>
+      <button id="btnToggleEdges">僅顯示選中紅線</button>
+      <button id="btnExportPng">下載圖表 (PNG)</button>
+      <button id="btnInstallApp" class="install-btn">安裝為桌面 App</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Graph View -->
+    <section id="graphView" class="graph-layout">
+      <div class="card">
+        <div class="svg-wrap">
+          <svg id="typeGraph" viewBox="0 0 820 820" xmlns="http://www.w3.org/2000/svg"></svg>
+        </div>
+        <div class="legend">
+          <span><i class="dot-red"></i> 紅色箭頭：防禦方 ➔ 害怕的攻擊屬性（弱點）</span>
+          <span>外圈迴圈：幽靈、龍互相剋制自身</span>
+          <span>點擊任一屬性可鎖定高亮，再次點擊取消</span>
+        </div>
+      </div>
+
+      <aside class="card side-panel">
+        <h2>
+          <span>屬性詳情</span>
+          <button id="btnReset" style="padding:4px 10px;font-size:0.78rem;">重置選取</button>
+        </h2>
+        <div id="detailBox">
+          <div class="hint">
+            將滑鼠移到左側任一屬性圖示上可即時預覽，點擊即可鎖定檢視其所有「防禦弱點」與「可剋制屬性」。
+          </div>
+        </div>
+        <div class="section-label">快速點選 18 屬性</div>
+        <div id="quickGrid" class="quick-grid"></div>
+      </aside>
+    </section>
+
+    <!-- Table View -->
+    <section id="tableView" class="card table-view">
+      <input id="searchInput" class="search-bar" type="text" placeholder="搜尋屬性或弱點（例如：龍、火、鋼）..." />
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 190px;">防禦屬性</th>
+              <th>防禦弱點（害怕的攻擊屬性）</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const TYPES = [
+      { id: 'normal',   name: '一般',   color: '#9099A1', weak: ['fighting'],
+        icon: '<circle cx="12" cy="12" r="7" fill="none" stroke="#fff" stroke-width="2.6"/><circle cx="12" cy="12" r="2.8" fill="#fff"/>' },
+      { id: 'fire',     name: '火',     color: '#FF9C54', weak: ['water', 'ground', 'rock'],
+        icon: '<path d="M12.6 3.5c.6 3.2-2.2 4.9-2.2 7.4 0 1.4 1 2.4 2.3 2.4 1.6 0 2.7-1.4 2.7-3.4 2 1.5 3.1 3.7 3.1 6.1 0 3.4-2.8 5.5-6.5 5.5-3.6 0-6.5-2.5-6.5-6.1 0-3.3 2.2-5.7 3.8-7.6 1.4-1.6 2.6-2.9 3.3-4.3z" fill="#fff"/>' },
+      { id: 'water',    name: '水',     color: '#4D90D5', weak: ['electric', 'grass'],
+        icon: '<path d="M12 3.2C9.2 7.4 6 10.7 6 14.3a6 6 0 0 0 12 0c0-3.6-3.2-6.9-6-11.1zm-1.6 13.4a3.2 3.2 0 0 1-1.9-2.9c0-.4.3-.7.7-.7s.7.3.7.7c0 .9.5 1.7 1.3 2 .4.1.6.5.4.9-.2.3-.7.2-1.2 0z" fill="#fff"/>' },
+      { id: 'grass',    name: '草',     color: '#63BB5B', weak: ['fire', 'ice', 'poison', 'flying', 'bug'],
+        icon: '<path d="M19.5 4.5C12 4.5 6.2 8.2 5.2 15.2c-.2 1.4.2 2.7.9 3.6l6.7-6.7c.4-.4 1-.4 1.4 0s.4 1 0 1.4l-6.6 6.6c1 .5 2.2.7 3.6.5 6.9-1 9.8-7 8.3-16.1z" fill="#fff"/>' },
+      { id: 'electric', name: '電',     color: '#EAB308', weak: ['ground'],
+        icon: '<path d="M13.5 2.8L6.2 13h5.1l-1.1 8.2L18 10.6h-5.2l.7-7.8z" fill="#fff"/>' },
+      { id: 'ice',      name: '冰',     color: '#74CEC0', weak: ['fire', 'fighting', 'rock', 'steel'],
+        icon: '<path d="M12 3v18M4.2 7.5l15.6 9M19.8 7.5l-15.6 9M10 5l2 2 2-2M10 19l2-2 2 2M5.5 10.2l2.6-.5-.7-2.6M18.5 13.8l-2.6.5.7 2.6M18.5 10.2l-2.6-.5.7-2.6M5.5 13.8l2.6.5-.7 2.6" stroke="#fff" stroke-width="2" stroke-linecap="round" fill="none"/>' },
+      { id: 'fighting', name: '格鬥',   color: '#CE4069', weak: ['flying', 'psychic', 'fairy'],
+        icon: '<path d="M7.5 11.5V8a1.5 1.5 0 0 1 3 0v2.5M10.5 10V7.2a1.5 1.5 0 0 1 3 0V10M13.5 10.2V8a1.5 1.5 0 0 1 3 0v4.2c0 3.7-2.4 6.8-6 6.8-3 0-5.2-1.8-5.5-4.8l-.2-2.2a1.5 1.5 0 0 1 2.7-.5z" fill="#fff"/>' },
+      { id: 'poison',   name: '毒',     color: '#AB6AC8', weak: ['ground', 'psychic'],
+        icon: '<circle cx="12" cy="10.5" r="5.5" fill="#fff"/><circle cx="10" cy="10" r="1.3" fill="#AB6AC8"/><circle cx="14" cy="10" r="1.3" fill="#AB6AC8"/><path d="M8.5 16.5c1.2 1.8 5.8 1.8 7 0M6.5 18.5l11-3M17.5 18.5l-11-3" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>' },
+      { id: 'ground',   name: '地面',   color: '#D97746', weak: ['water', 'grass', 'ice'],
+        icon: '<path d="M3 18h18l-4.5-9.5-3.2 5-3.6-7.5L3 18z" fill="#fff"/>' },
+      { id: 'flying',   name: '飛行',   color: '#8FA8DD', weak: ['electric', 'ice', 'rock'],
+        icon: '<path d="M4 16.5C8.5 16 14 13.5 19.5 6.5c-4.5 1.5-8.5 1.8-13 1 3.5 1.8 4.8 3.2 2.5 5.2-1.5 1.3-3.2 2.3-5 3.8z" fill="#fff"/>' },
+      { id: 'psychic',  name: '超能力', color: '#F97176', weak: ['bug', 'ghost', 'dark'],
+        icon: '<path d="M12 6.2c4.4 0 8 2.6 9.5 5.8-1.5 3.2-5.1 5.8-9.5 5.8S4 15.2 2.5 12C4 8.8 7.6 6.2 12 6.2z" fill="none" stroke="#fff" stroke-width="2.2"/><circle cx="12" cy="12" r="3" fill="#fff"/>' },
+      { id: 'bug',      name: '蟲',     color: '#90C12C', weak: ['fire', 'flying', 'rock'],
+        icon: '<ellipse cx="12" cy="13.5" rx="4.5" ry="5.5" fill="#fff"/><circle cx="12" cy="7" r="2.4" fill="#fff"/><path d="M9.5 5.2L7.5 3.5M14.5 5.2l2-1.7M7.5 11.5H4.5M19.5 11.5h-3M7.5 15H4.8M19.2 15h-2.7" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>' },
+      { id: 'rock',     name: '岩石',   color: '#C7B78B', weak: ['water', 'grass', 'fighting', 'ground', 'steel'],
+        icon: '<polygon points="7,6 15,5 19.5,11 16,18.5 7.5,18 4.5,12.5" fill="#fff"/>' },
+      { id: 'ghost',    name: '幽靈',   color: '#5269AC', weak: ['ghost', 'dark'],
+        icon: '<path d="M12 4.5a6 6 0 0 0-6 6v8l2.5-1.8 2 1.8 1.5-1.5 1.5 1.5 2-1.8 2.5 1.8v-8a6 6 0 0 0-6-6z" fill="#fff"/><circle cx="10" cy="10.5" r="1.2" fill="#5269AC"/><circle cx="14" cy="10.5" r="1.2" fill="#5269AC"/>' },
+      { id: 'dragon',   name: '龍',     color: '#0A6DC4', weak: ['ice', 'dragon', 'fairy'],
+        icon: '<path d="M6.5 17.5c2.2-1 3.5-2.6 3.8-4.8-1.8-.3-3.1-1.6-3.1-3.4 0-2.6 2.5-4.8 5.8-4.8 2.4 0 4.5 1.1 5.5 2.8-1.4-.3-2.6-.1-3.5.7 1.3.4 2.4 1.5 2.4 3.1 0 3.4-3.3 6.8-10.9 6.4z" fill="#fff"/>' },
+      { id: 'dark',     name: '惡',     color: '#5A5366', weak: ['fighting', 'bug', 'fairy'],
+        icon: '<path d="M15.8 4.8A7.5 7.5 0 1 0 19.2 16a6.2 6.2 0 0 1-3.4-11.2z" fill="#fff"/>' },
+      { id: 'steel',    name: '鋼',     color: '#5A8EA1', weak: ['fire', 'fighting', 'ground'],
+        icon: '<polygon points="12,3.8 19,7.8 19,16.2 12,20.2 5,16.2 5,7.8" fill="none" stroke="#fff" stroke-width="2.4"/><circle cx="12" cy="12" r="3" fill="#fff"/>' },
+      { id: 'fairy',    name: '妖精',   color: '#EC8FE6', weak: ['poison', 'steel'],
+        icon: '<path d="M12 3.2l2.1 5.8 5.9 2.2-5.9 2.2-2.1 5.8-2.1-5.8L4 11.2l5.9-2.2z" fill="#fff"/>' }
+    ];
+
+    const TYPE_MAP = Object.fromEntries(TYPES.map(t => [t.id, t]));
+    const CX = 410, CY = 410, R = 315, NODE_R = 28;
+
+    // Precompute positions around circle
+    TYPES.forEach((t, i) => {
+      const angle = (i / TYPES.length) * Math.PI * 2 - Math.PI / 2;
+      t.angle = angle;
+      t.x = CX + Math.cos(angle) * R;
+      t.y = CY + Math.sin(angle) * R;
+    });
+
+    let lockedId = null;
+    let hoveredId = null;
+    let onlySelectedEdges = false;
+
+    const svg = document.getElementById('typeGraph');
+    const detailBox = document.getElementById('detailBox');
+    const quickGrid = document.getElementById('quickGrid');
+    const tableBody = document.getElementById('tableBody');
+
+    function createPillHTML(t) {
+      return `<span class="type-pill" data-id="${t.id}" style="background:${t.color}">
+        <svg viewBox="0 0 24 24">${t.icon}</svg>${t.name}
+      </span>`;
+    }
+
+    function buildGraph() {
+      const ns = 'http://www.w3.org/2000/svg';
+      svg.innerHTML = '';
+
+      // Defs (arrowheads & glow)
+      const defs = document.createElementNS(ns, 'defs');
+      defs.innerHTML = `
+        <marker id="arrow-dim" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1.5 L 10 5 L 0 8.5 z" fill="#ef4444" fill-opacity="0.32" />
+        </marker>
+        <marker id="arrow-hi" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7.5" markerHeight="7.5" orient="auto-start-reverse">
+          <path d="M 0 1 L 10 5 L 0 9 z" fill="#ff3b3b" />
+        </marker>
+        <filter id="redGlow" x="-40%" y="-40%" width="180%" height="180%">
+          <feDropShadow dx="0" dy="0" stdDeviation="5" flood-color="#ef4444" flood-opacity="0.95"/>
+        </filter>
+        <filter id="whiteGlow" x="-40%" y="-40%" width="180%" height="180%">
+          <feDropShadow dx="0" dy="0" stdDeviation="5" flood-color="#ffffff" flood-opacity="0.85"/>
+        </filter>
+      `;
+      svg.appendChild(defs);
+
+      // Subtle guide circle
+      const guide = document.createElementNS(ns, 'circle');
+      guide.setAttribute('cx', CX);
+      guide.setAttribute('cy', CY);
+      guide.setAttribute('r', R);
+      guide.setAttribute('fill', 'none');
+      guide.setAttribute('stroke', '#334155');
+      guide.setAttribute('stroke-dasharray', '4 6');
+      guide.setAttribute('stroke-width', '1.2');
+      svg.appendChild(guide);
+
+      const edgesLayer = document.createElementNS(ns, 'g');
+      edgesLayer.setAttribute('id', 'edgesLayer');
+      svg.appendChild(edgesLayer);
+
+      // Build 51 edges (Defending -> Weakness)
+      TYPES.forEach(src => {
+        src.weak.forEach(targetId => {
+          const dst = TYPE_MAP[targetId];
+          const path = document.createElementNS(ns, 'path');
+          path.classList.add('edge-path');
+          path.dataset.src = src.id;
+          path.dataset.dst = dst.id;
+
+          if (src.id === dst.id) {
+            // Outer self-loop for Ghost & Dragon
+            const ux = Math.cos(src.angle);
+            const uy = Math.sin(src.angle);
+            const tx = -uy, ty = ux;
+            const sx = src.x + ux * (NODE_R - 2) + tx * 12;
+            const sy = src.y + uy * (NODE_R - 2) + ty * 12;
+            const ex = src.x + ux * (NODE_R + 4) - tx * 12;
+            const ey = src.y + uy * (NODE_R + 4) - ty * 12;
+            const c1x = src.x + ux * (NODE_R + 48) + tx * 34;
+            const c1y = src.y + uy * (NODE_R + 48) + ty * 34;
+            const c2x = src.x + ux * (NODE_R + 48) - tx * 34;
+            const c2y = src.y + uy * (NODE_R + 48) - ty * 34;
+            path.setAttribute('d', `M ${sx.toFixed(1)} ${sy.toFixed(1)} C ${c1x.toFixed(1)} ${c1y.toFixed(1)}, ${c2x.toFixed(1)} ${c2y.toFixed(1)}, ${ex.toFixed(1)} ${ey.toFixed(1)}`);
+          } else {
+            // Curved chord pulled toward center
+            const dx = dst.x - src.x;
+            const dy = dst.y - src.y;
+            const dist = Math.hypot(dx, dy);
+            const mx = (src.x + dst.x) / 2;
+            const my = (src.y + dst.y) / 2;
+            const pull = 0.28;
+            const qx = mx + (CX - mx) * pull;
+            const qy = my + (CY - my) * pull;
+
+            // Trim start & end so arrow stops neatly at node border
+            const sDx = qx - src.x, sDy = qy - src.y;
+            const sLen = Math.hypot(sDx, sDy) || 1;
+            const sx = src.x + (sDx / sLen) * (NODE_R + 3);
+            const sy = src.y + (sDy / sLen) * (NODE_R + 3);
+
+            const eDx = qx - dst.x, eDy = qy - dst.y;
+            const eLen = Math.hypot(eDx, eDy) || 1;
+            const ex = dst.x + (eDx / eLen) * (NODE_R + 7);
+            const ey = dst.y + (eDy / eLen) * (NODE_R + 7);
+
+            path.setAttribute('d', `M ${sx.toFixed(1)} ${sy.toFixed(1)} Q ${qx.toFixed(1)} ${qy.toFixed(1)} ${ex.toFixed(1)} ${ey.toFixed(1)}`);
+          }
+
+          edgesLayer.appendChild(path);
+        });
+      });
+
+      // Nodes layer
+      const nodesLayer = document.createElementNS(ns, 'g');
+      nodesLayer.setAttribute('id', 'nodesLayer');
+      svg.appendChild(nodesLayer);
+
+      TYPES.forEach(t => {
+        const g = document.createElementNS(ns, 'g');
+        g.classList.add('node-group');
+        g.dataset.id = t.id;
+
+        const circle = document.createElementNS(ns, 'circle');
+        circle.setAttribute('cx', t.x);
+        circle.setAttribute('cy', t.y);
+        circle.setAttribute('r', NODE_R);
+        circle.setAttribute('fill', t.color);
+        circle.setAttribute('stroke', '#f8fafc');
+        circle.setAttribute('stroke-width', '2.5');
+        g.appendChild(circle);
+
+        const iconG = document.createElementNS(ns, 'g');
+        iconG.setAttribute('transform', `translate(${(t.x - 14).toFixed(1)}, ${(t.y - 14).toFixed(1)}) scale(1.16)`);
+        iconG.innerHTML = t.icon;
+        g.appendChild(iconG);
+
+        // Label outside the circle
+        const labelR = R + 45;
+        const lx = CX + Math.cos(t.angle) * labelR;
+        const ly = CY + Math.sin(t.angle) * labelR;
+        const text = document.createElementNS(ns, 'text');
+        text.setAttribute('x', lx.toFixed(1));
+        text.setAttribute('y', (ly + 5).toFixed(1));
+        text.setAttribute('text-anchor', 'middle');
+        text.setAttribute('fill', '#f1f5f9');
+        text.setAttribute('font-size', '13.5');
+        text.setAttribute('font-weight', '700');
+        text.textContent = t.name;
+        g.appendChild(text);
+
+        g.addEventListener('mouseenter', () => {
+          if (!lockedId) {
+            hoveredId = t.id;
+            updateVisuals();
+          }
+        });
+        g.addEventListener('mouseleave', () => {
+          if (!lockedId) {
+            hoveredId = null;
+            updateVisuals();
+          }
+        });
+        g.addEventListener('click', () => {
+          lockedId = (lockedId === t.id) ? null : t.id;
+          hoveredId = null;
+          updateVisuals();
+        });
+
+        nodesLayer.appendChild(g);
+      });
+    }
+
+    function updateVisuals() {
+      const activeId = lockedId || hoveredId;
+      const activeType = activeId ? TYPE_MAP[activeId] : null;
+      const weakSet = activeType ? new Set(activeType.weak) : new Set();
+
+      document.querySelectorAll('.edge-path').forEach(p => {
+        const isOutgoing = activeId && p.dataset.src === activeId;
+        if (!activeId) {
+          p.style.opacity = onlySelectedEdges ? '0' : '0.24';
+          p.style.strokeWidth = '1.5';
+          p.setAttribute('marker-end', 'url(#arrow-dim)');
+          p.classList.remove('edge-animated');
+        } else if (isOutgoing) {
+          p.style.opacity = '1';
+          p.style.strokeWidth = '3.2';
+          p.setAttribute('marker-end', 'url(#arrow-hi)');
+          p.classList.add('edge-animated');
+        } else {
+          p.style.opacity = onlySelectedEdges ? '0' : '0.05';
+          p.style.strokeWidth = '1.2';
+          p.setAttribute('marker-end', 'url(#arrow-dim)');
+          p.classList.remove('edge-animated');
+        }
+      });
+
+      document.querySelectorAll('.node-group').forEach(g => {
+        const id = g.dataset.id;
+        const circle = g.querySelector('circle');
+        if (!activeId) {
+          g.style.opacity = '1';
+          circle.setAttribute('filter', '');
+          circle.setAttribute('stroke', '#f8fafc');
+          circle.setAttribute('stroke-width', '2.5');
+        } else if (id === activeId) {
+          g.style.opacity = '1';
+          circle.setAttribute('filter', 'url(#whiteGlow)');
+          circle.setAttribute('stroke', '#ffffff');
+          circle.setAttribute('stroke-width', '4');
+        } else if (weakSet.has(id)) {
+          g.style.opacity = '1';
+          circle.setAttribute('filter', 'url(#redGlow)');
+          circle.setAttribute('stroke', '#ff4d4d');
+          circle.setAttribute('stroke-width', '3.6');
+        } else {
+          g.style.opacity = '0.26';
+          circle.setAttribute('filter', '');
+          circle.setAttribute('stroke', '#f8fafc');
+          circle.setAttribute('stroke-width', '2');
+        }
+      });
+
+      renderDetail(activeType);
+    }
+
+    function renderDetail(t) {
+      if (!t) {
+        detailBox.innerHTML = `<div class="hint">將滑鼠移到左側任一屬性圖示上可即時預覽，點擊即可鎖定檢視其所有「防禦弱點」與「可剋制屬性」。</div>`;
+        return;
+      }
+      const weakTypes = t.weak.map(id => TYPE_MAP[id]);
+      const strongAgainst = TYPES.filter(other => other.weak.includes(t.id));
+
+      detailBox.innerHTML = `
+        <div class="selected-header">
+          <div style="width:44px;height:44px;border-radius:50%;background:${t.color};display:flex;align-items:center;justify-content:center;border:2px solid #fff;flex-shrink:0;">
+            <svg width="26" height="26" viewBox="0 0 24 24">${t.icon}</svg>
+          </div>
+          <div>
+            <div style="font-size:1.1rem;font-weight:700;">${t.name}系 ${lockedId ? '🔒' : ''}</div>
+            <div style="font-size:0.8rem;color:#94a3b8;">防禦弱點 ${weakTypes.length} 個 · 可剋制 ${strongAgainst.length} 個</div>
+          </div>
+        </div>
+        <div class="section-label" style="color:#fca5a5;">防禦弱點（紅箭頭指向 · 害怕）</div>
+        <div class="badge-list">${weakTypes.map(createPillHTML).join('')}</div>
+        <div class="section-label" style="color:#86efac;">攻擊有利（可剋制的屬性）</div>
+        <div class="badge-list">${strongAgainst.length ? strongAgainst.map(createPillHTML).join('') : '<span style="color:#94a3b8;font-size:0.84rem;">無</span>'}</div>
+      `;
+    }
+
+    function buildQuickGrid() {
+      quickGrid.innerHTML = TYPES.map(createPillHTML).join('');
+      document.addEventListener('click', (e) => {
+        const pill = e.target.closest('.type-pill');
+        if (pill && pill.dataset.id) {
+          lockedId = pill.dataset.id;
+          hoveredId = null;
+          updateVisuals();
+        }
+      });
+    }
+
+    function renderTable(filter = '') {
+      const q = filter.trim();
+      const rows = TYPES.filter(t => {
+        if (!q) return true;
+        return t.name.includes(q) || t.weak.some(id => TYPE_MAP[id].name.includes(q));
+      });
+      tableBody.innerHTML = rows.map(t => `
+        <tr>
+          <td>${createPillHTML(t)}</td>
+          <td><div class="badge-list">${t.weak.map(id => createPillHTML(TYPE_MAP[id])).join('')}</div></td>
+        </tr>
+      `).join('');
+    }
+
+    // View switching & controls
+    const btnGraphView = document.getElementById('btnGraphView');
+    const btnTableView = document.getElementById('btnTableView');
+    const graphView = document.getElementById('graphView');
+    const tableView = document.getElementById('tableView');
+
+    btnGraphView.addEventListener('click', () => {
+      btnGraphView.classList.add('active');
+      btnTableView.classList.remove('active');
+      graphView.style.display = 'grid';
+      tableView.style.display = 'none';
+    });
+
+    btnTableView.addEventListener('click', () => {
+      btnTableView.classList.add('active');
+      btnGraphView.classList.remove('active');
+      graphView.style.display = 'none';
+      tableView.style.display = 'block';
+    });
+
+    const btnToggleEdges = document.getElementById('btnToggleEdges');
+    btnToggleEdges.addEventListener('click', () => {
+      onlySelectedEdges = !onlySelectedEdges;
+      btnToggleEdges.classList.toggle('active', onlySelectedEdges);
+      btnToggleEdges.textContent = onlySelectedEdges ? '顯示全部紅線' : '僅顯示選中紅線';
+      updateVisuals();
+    });
+
+    document.getElementById('btnReset').addEventListener('click', () => {
+      lockedId = null;
+      hoveredId = null;
+      updateVisuals();
+    });
+
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      renderTable(e.target.value);
+    });
+
+    // High-res PNG export
+    document.getElementById('btnExportPng').addEventListener('click', () => {
+      const clone = svg.cloneNode(true);
+      clone.setAttribute('width', '1640');
+      clone.setAttribute('height', '1640');
+      const bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      bg.setAttribute('width', '820');
+      bg.setAttribute('height', '820');
+      bg.setAttribute('fill', '#0f172a');
+      clone.insertBefore(bg, clone.firstChild);
+
+      const svgData = new XMLSerializer().serializeToString(clone);
+      const blob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 1640;
+        canvas.height = 1640;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        URL.revokeObjectURL(url);
+        const a = document.createElement('a');
+        a.download = 'pokemon_go_type_weakness_graph.png';
+        a.href = canvas.toDataURL('image/png');
+        a.click();
+      };
+      img.src = url;
+    });
+
+    // PWA Install Prompt & Service Worker
+    let deferredPrompt = null;
+    const btnInstall = document.getElementById('btnInstallApp');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      btnInstall.style.display = 'inline-flex';
+    });
+
+    btnInstall.addEventListener('click', async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      btnInstall.style.display = 'none';
+    });
+
+    if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    }
+
+    // Init
+    buildGraph();
+    buildQuickGrid();
+    renderTable();
+    updateVisuals();
+  </script>
+</body>
+</html>
