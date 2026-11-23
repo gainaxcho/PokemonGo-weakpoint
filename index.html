@@ -107,7 +107,7 @@
     }
     main {
       flex: 1;
-      max-width: 1380px;
+      max-width: 1520px;
       width: 100%;
       margin: 0 auto;
       padding: 18px;
@@ -118,7 +118,7 @@
       gap: 18px;
       align-items: start;
     }
-    @media (max-width: 980px) {
+    @media (max-width: 1024px) {
       .graph-layout {
         grid-template-columns: 1fr;
       }
@@ -133,7 +133,7 @@
     .svg-wrap {
       width: 100%;
       aspect-ratio: 1 / 1;
-      max-height: 760px;
+      max-height: 920px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -142,15 +142,15 @@
     svg#typeGraph {
       width: 100%;
       height: 100%;
-      max-width: 760px;
-      max-height: 760px;
+      max-width: 920px;
+      max-height: 920px;
       user-select: none;
     }
     .legend {
       display: flex;
       flex-wrap: wrap;
       gap: 14px;
-      font-size: 0.82rem;
+      font-size: 0.85rem;
       color: var(--muted);
       margin-top: 10px;
       justify-content: center;
@@ -161,11 +161,11 @@
       gap: 6px;
     }
     .dot-red {
-      width: 18px;
-      height: 3px;
+      width: 22px;
+      height: 5px;
       background: var(--accent);
       display: inline-block;
-      border-radius: 2px;
+      border-radius: 3px;
     }
     .side-panel h2 {
       margin: 0 0 10px;
@@ -277,14 +277,15 @@
     .edge-path {
       fill: none;
       stroke: #ef4444;
+      stroke-linecap: round;
       transition: opacity 0.2s ease, stroke-width 0.2s ease;
     }
     .edge-animated {
-      stroke-dasharray: 8 5;
+      stroke-dasharray: 22 14;
       animation: flow 0.9s linear infinite;
     }
     @keyframes flow {
-      to { stroke-dashoffset: -26; }
+      to { stroke-dashoffset: -72; }
     }
     .node-group {
       cursor: pointer;
@@ -315,7 +316,7 @@
     <section id="graphView" class="graph-layout">
       <div class="card">
         <div class="svg-wrap">
-          <svg id="typeGraph" viewBox="0 0 820 820" xmlns="http://www.w3.org/2000/svg"></svg>
+          <svg id="typeGraph" viewBox="0 0 1280 1280" xmlns="http://www.w3.org/2000/svg"></svg>
         </div>
         <div class="legend">
           <span><i class="dot-red"></i> 紅色箭頭：防禦方 ➔ 害怕的攻擊屬性（弱點）</span>
@@ -397,7 +398,8 @@
     ];
 
     const TYPE_MAP = Object.fromEntries(TYPES.map(t => [t.id, t]));
-    const CX = 410, CY = 410, R = 315, NODE_R = 28;
+    // 2x icons (NODE_R: 28 -> 56), 3x text (font-size: 13.5 -> 40.5), 3x arrow lines (stroke: 1.5/3.2/1.2 -> 4.5/9.6/3.6)
+    const CX = 640, CY = 640, R = 420, NODE_R = 56;
 
     // Precompute positions around circle
     TYPES.forEach((t, i) => {
@@ -426,20 +428,20 @@
       const ns = 'http://www.w3.org/2000/svg';
       svg.innerHTML = '';
 
-      // Defs (arrowheads & glow)
+      // Defs (arrowheads using userSpaceOnUse for crisp proportions with 3x thicker lines)
       const defs = document.createElementNS(ns, 'defs');
       defs.innerHTML = `
-        <marker id="arrow-dim" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-          <path d="M 0 1.5 L 10 5 L 0 8.5 z" fill="#ef4444" fill-opacity="0.32" />
+        <marker id="arrow-dim" viewBox="0 0 20 20" refX="15" refY="10" markerWidth="20" markerHeight="20" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+          <path d="M 0 3 L 18 10 L 0 17 z" fill="#ef4444" fill-opacity="0.45" />
         </marker>
-        <marker id="arrow-hi" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7.5" markerHeight="7.5" orient="auto-start-reverse">
-          <path d="M 0 1 L 10 5 L 0 9 z" fill="#ff3b3b" />
+        <marker id="arrow-hi" viewBox="0 0 28 28" refX="21" refY="14" markerWidth="28" markerHeight="28" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+          <path d="M 0 3 L 26 14 L 0 25 z" fill="#ff3b3b" />
         </marker>
         <filter id="redGlow" x="-40%" y="-40%" width="180%" height="180%">
-          <feDropShadow dx="0" dy="0" stdDeviation="5" flood-color="#ef4444" flood-opacity="0.95"/>
+          <feDropShadow dx="0" dy="0" stdDeviation="8" flood-color="#ef4444" flood-opacity="0.95"/>
         </filter>
         <filter id="whiteGlow" x="-40%" y="-40%" width="180%" height="180%">
-          <feDropShadow dx="0" dy="0" stdDeviation="5" flood-color="#ffffff" flood-opacity="0.85"/>
+          <feDropShadow dx="0" dy="0" stdDeviation="8" flood-color="#ffffff" flood-opacity="0.85"/>
         </filter>
       `;
       svg.appendChild(defs);
@@ -451,8 +453,8 @@
       guide.setAttribute('r', R);
       guide.setAttribute('fill', 'none');
       guide.setAttribute('stroke', '#334155');
-      guide.setAttribute('stroke-dasharray', '4 6');
-      guide.setAttribute('stroke-width', '1.2');
+      guide.setAttribute('stroke-dasharray', '6 8');
+      guide.setAttribute('stroke-width', '2');
       svg.appendChild(guide);
 
       const edgesLayer = document.createElementNS(ns, 'g');
@@ -469,24 +471,21 @@
           path.dataset.dst = dst.id;
 
           if (src.id === dst.id) {
-            // Outer self-loop for Ghost & Dragon
+            // Outer self-loop for Ghost & Dragon (fits cleanly between node and outer label)
             const ux = Math.cos(src.angle);
             const uy = Math.sin(src.angle);
             const tx = -uy, ty = ux;
-            const sx = src.x + ux * (NODE_R - 2) + tx * 12;
-            const sy = src.y + uy * (NODE_R - 2) + ty * 12;
-            const ex = src.x + ux * (NODE_R + 4) - tx * 12;
-            const ey = src.y + uy * (NODE_R + 4) - ty * 12;
-            const c1x = src.x + ux * (NODE_R + 48) + tx * 34;
-            const c1y = src.y + uy * (NODE_R + 48) + ty * 34;
-            const c2x = src.x + ux * (NODE_R + 48) - tx * 34;
-            const c2y = src.y + uy * (NODE_R + 48) - ty * 34;
+            const sx = src.x + ux * (NODE_R - 4) + tx * 24;
+            const sy = src.y + uy * (NODE_R - 4) + ty * 24;
+            const ex = src.x + ux * (NODE_R + 8) - tx * 24;
+            const ey = src.y + uy * (NODE_R + 8) - ty * 24;
+            const c1x = src.x + ux * (NODE_R + 68) + tx * 52;
+            const c1y = src.y + uy * (NODE_R + 68) + ty * 52;
+            const c2x = src.x + ux * (NODE_R + 68) - tx * 52;
+            const c2y = src.y + uy * (NODE_R + 68) - ty * 52;
             path.setAttribute('d', `M ${sx.toFixed(1)} ${sy.toFixed(1)} C ${c1x.toFixed(1)} ${c1y.toFixed(1)}, ${c2x.toFixed(1)} ${c2y.toFixed(1)}, ${ex.toFixed(1)} ${ey.toFixed(1)}`);
           } else {
             // Curved chord pulled toward center
-            const dx = dst.x - src.x;
-            const dy = dst.y - src.y;
-            const dist = Math.hypot(dx, dy);
             const mx = (src.x + dst.x) / 2;
             const my = (src.y + dst.y) / 2;
             const pull = 0.28;
@@ -496,13 +495,13 @@
             // Trim start & end so arrow stops neatly at node border
             const sDx = qx - src.x, sDy = qy - src.y;
             const sLen = Math.hypot(sDx, sDy) || 1;
-            const sx = src.x + (sDx / sLen) * (NODE_R + 3);
-            const sy = src.y + (sDy / sLen) * (NODE_R + 3);
+            const sx = src.x + (sDx / sLen) * (NODE_R + 6);
+            const sy = src.y + (sDy / sLen) * (NODE_R + 6);
 
             const eDx = qx - dst.x, eDy = qy - dst.y;
             const eLen = Math.hypot(eDx, eDy) || 1;
-            const ex = dst.x + (eDx / eLen) * (NODE_R + 7);
-            const ey = dst.y + (eDy / eLen) * (NODE_R + 7);
+            const ex = dst.x + (eDx / eLen) * (NODE_R + 14);
+            const ey = dst.y + (eDy / eLen) * (NODE_R + 14);
 
             path.setAttribute('d', `M ${sx.toFixed(1)} ${sy.toFixed(1)} Q ${qx.toFixed(1)} ${qy.toFixed(1)} ${ex.toFixed(1)} ${ey.toFixed(1)}`);
           }
@@ -527,25 +526,30 @@
         circle.setAttribute('r', NODE_R);
         circle.setAttribute('fill', t.color);
         circle.setAttribute('stroke', '#f8fafc');
-        circle.setAttribute('stroke-width', '2.5');
+        circle.setAttribute('stroke-width', '4');
         g.appendChild(circle);
 
+        // 2x enlarged icon inside node
         const iconG = document.createElementNS(ns, 'g');
-        iconG.setAttribute('transform', `translate(${(t.x - 14).toFixed(1)}, ${(t.y - 14).toFixed(1)}) scale(1.16)`);
+        iconG.setAttribute('transform', `translate(${(t.x - 28).toFixed(1)}, ${(t.y - 28).toFixed(1)}) scale(2.33)`);
         iconG.innerHTML = t.icon;
         g.appendChild(iconG);
 
-        // Label outside the circle
-        const labelR = R + 45;
+        // 3x enlarged label outside the circle (13.5 * 3 = 40.5)
+        const labelR = R + NODE_R + 68;
         const lx = CX + Math.cos(t.angle) * labelR;
         const ly = CY + Math.sin(t.angle) * labelR;
         const text = document.createElementNS(ns, 'text');
         text.setAttribute('x', lx.toFixed(1));
-        text.setAttribute('y', (ly + 5).toFixed(1));
+        text.setAttribute('y', (ly + 14).toFixed(1));
         text.setAttribute('text-anchor', 'middle');
         text.setAttribute('fill', '#f1f5f9');
-        text.setAttribute('font-size', '13.5');
+        text.setAttribute('font-size', '40.5');
         text.setAttribute('font-weight', '700');
+        text.setAttribute('paint-order', 'stroke');
+        text.setAttribute('stroke', '#0f172a');
+        text.setAttribute('stroke-width', '7');
+        text.setAttribute('stroke-linejoin', 'round');
         text.textContent = t.name;
         g.appendChild(text);
 
@@ -579,18 +583,18 @@
       document.querySelectorAll('.edge-path').forEach(p => {
         const isOutgoing = activeId && p.dataset.src === activeId;
         if (!activeId) {
-          p.style.opacity = onlySelectedEdges ? '0' : '0.24';
-          p.style.strokeWidth = '1.5';
+          p.style.opacity = onlySelectedEdges ? '0' : '0.26';
+          p.style.strokeWidth = '4.5';
           p.setAttribute('marker-end', 'url(#arrow-dim)');
           p.classList.remove('edge-animated');
         } else if (isOutgoing) {
           p.style.opacity = '1';
-          p.style.strokeWidth = '3.2';
+          p.style.strokeWidth = '9.6';
           p.setAttribute('marker-end', 'url(#arrow-hi)');
           p.classList.add('edge-animated');
         } else {
-          p.style.opacity = onlySelectedEdges ? '0' : '0.05';
-          p.style.strokeWidth = '1.2';
+          p.style.opacity = onlySelectedEdges ? '0' : '0.06';
+          p.style.strokeWidth = '3.6';
           p.setAttribute('marker-end', 'url(#arrow-dim)');
           p.classList.remove('edge-animated');
         }
@@ -603,22 +607,22 @@
           g.style.opacity = '1';
           circle.setAttribute('filter', '');
           circle.setAttribute('stroke', '#f8fafc');
-          circle.setAttribute('stroke-width', '2.5');
+          circle.setAttribute('stroke-width', '4');
         } else if (id === activeId) {
           g.style.opacity = '1';
           circle.setAttribute('filter', 'url(#whiteGlow)');
           circle.setAttribute('stroke', '#ffffff');
-          circle.setAttribute('stroke-width', '4');
+          circle.setAttribute('stroke-width', '7');
         } else if (weakSet.has(id)) {
           g.style.opacity = '1';
           circle.setAttribute('filter', 'url(#redGlow)');
           circle.setAttribute('stroke', '#ff4d4d');
-          circle.setAttribute('stroke-width', '3.6');
+          circle.setAttribute('stroke-width', '6.5');
         } else {
           g.style.opacity = '0.26';
           circle.setAttribute('filter', '');
           circle.setAttribute('stroke', '#f8fafc');
-          circle.setAttribute('stroke-width', '2');
+          circle.setAttribute('stroke-width', '3.5');
         }
       });
 
@@ -714,14 +718,14 @@
       renderTable(e.target.value);
     });
 
-    // High-res PNG export
+    // High-res PNG export (2560x2560)
     document.getElementById('btnExportPng').addEventListener('click', () => {
       const clone = svg.cloneNode(true);
-      clone.setAttribute('width', '1640');
-      clone.setAttribute('height', '1640');
+      clone.setAttribute('width', '2560');
+      clone.setAttribute('height', '2560');
       const bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-      bg.setAttribute('width', '820');
-      bg.setAttribute('height', '820');
+      bg.setAttribute('width', '1280');
+      bg.setAttribute('height', '1280');
       bg.setAttribute('fill', '#0f172a');
       clone.insertBefore(bg, clone.firstChild);
 
@@ -731,8 +735,8 @@
       const img = new Image();
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        canvas.width = 1640;
-        canvas.height = 1640;
+        canvas.width = 2560;
+        canvas.height = 2560;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0);
         URL.revokeObjectURL(url);
